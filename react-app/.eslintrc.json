@@ -1,0 +1,75 @@
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "project": "./tsconfig.json",
+    "ecmaVersion": 2022,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "plugins": ["@typescript-eslint", "import", "functional", "react-hooks"],
+  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "plugin:import/typescript", "plugin:react-hooks/recommended"],
+  "rules": {
+    "@typescript-eslint/consistent-type-definitions": ["error", "type"],
+    "no-implicit-coercion": ["error"],
+    "indent": ["error", 4],
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_",
+        "caughtErrorsIgnorePattern": "^_"
+      }
+    ],
+    "@typescript-eslint/no-namespace": [
+      "error",
+      {
+        "allowDeclarations": true
+      }
+    ],
+    "@typescript-eslint/explicit-function-return-type": [
+      "error",
+      {
+        "allowExpressions": true,
+        "allowTypedFunctionExpressions": true,
+        "allowHigherOrderFunctions": true
+      }
+    ],
+    "quotes": [
+      "error",
+      "single",
+      {
+        "avoidEscape": true
+      }
+    ],
+    "semi": ["error", "always"],
+    "comma-dangle": ["error", "always-multiline"],
+    "object-curly-spacing": ["error", "never"],
+    "import/no-restricted-paths": "off",
+    "import/no-internal-modules": "off",
+    "import/no-cycle": [
+      "error",
+      {
+        "maxDepth": 3,
+        "ignoreExternal": true
+      }
+    ],
+    "functional/no-classes": ["error"],
+    "functional/prefer-property-signatures": ["error"],
+    "functional/prefer-readonly-type": ["error"],
+    "functional/no-this-expressions": ["error"],
+    "functional/no-promise-reject": ["error"],
+    "no-param-reassign": [
+      "error",
+      {
+        "props": true
+      }
+    ],
+    "@typescript-eslint/no-floating-promises": "error",
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "off"
+  }
+}
+
