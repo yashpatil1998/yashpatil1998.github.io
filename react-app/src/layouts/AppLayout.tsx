@@ -1,3 +1,5 @@
+import DarkModeIcon from '@mui/icons-material/DarkMode'
+import LightModeIcon from '@mui/icons-material/LightMode'
 import MenuIcon from '@mui/icons-material/Menu'
 import {
   AppBar,
@@ -17,6 +19,7 @@ import {
 } from '@mui/material'
 import { useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { useColorMode } from '../context/ColorModeContext'
 import { navItems } from '../data/navigation'
 
 const drawerWidth = 260
@@ -25,6 +28,7 @@ const AppLayout = () => {
   const [mobileOpen, setMobileOpen] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
+  const { toggleColorMode, mode } = useColorMode()
 
   const handleNavigate = (path: string) => {
     navigate(path)
@@ -84,7 +88,7 @@ const AppLayout = () => {
           >
             Yash Patil
           </Typography>
-          <Stack direction="row" spacing={1} sx={{ display: { xs: 'none', md: 'flex' } }}>
+          <Stack direction="row" spacing={1} sx={{ display: { xs: 'none', md: 'flex' }, mr: 2 }}>
             {navItems.map((item) => (
               <Button
                 key={item.path}
@@ -99,6 +103,9 @@ const AppLayout = () => {
               </Button>
             ))}
           </Stack>
+          <IconButton onClick={toggleColorMode} color="inherit" aria-label="toggle dark mode">
+            {mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
+          </IconButton>
         </Toolbar>
       </AppBar>
 
@@ -139,4 +146,3 @@ const AppLayout = () => {
 }
 
 export default AppLayout
-
