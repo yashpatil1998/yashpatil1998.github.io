@@ -1,10 +1,13 @@
-import { DndContext, type DragEndEvent, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core'
+import { DndContext, type DragEndEvent, MouseSensor, TouchSensor, useSensor, useSensors, PointerSensor } from '@dnd-kit/core'
 import { restrictToParentElement } from '@dnd-kit/modifiers'
 import UnfoldLessIcon from '@mui/icons-material/UnfoldLess'
 import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore'
-import { Box, Chip, Divider, IconButton, List, ListItem, Stack, Typography, alpha, useTheme } from '@mui/material'
+import VideocamIcon from '@mui/icons-material/Videocam'
+import VideocamOffIcon from '@mui/icons-material/VideocamOff'
+import { Box, Button, Chip, Divider, IconButton, List, ListItem, Stack, Typography, alpha, useTheme } from '@mui/material'
 import { useState } from 'react'
 import { DraggableCard } from '../components/DraggableCard'
+import { GestureController } from '../components/GestureController'
 import { education } from '../data/education'
 import { experiences } from '../data/experience'
 import { projects } from '../data/projects'
@@ -44,8 +47,10 @@ const InteractPage = () => {
   })
 
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [gestureEnabled, setGestureEnabled] = useState(false)
 
   const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } })
   )
@@ -79,21 +84,47 @@ const InteractPage = () => {
         backgroundSize: '20px 20px',
       }}
     >
-      <Typography 
-        variant="caption" 
-        sx={{ 
-          position: 'absolute', 
-          top: 10, 
-          left: 10, 
-          zIndex: 0, 
-          color: 'text.secondary',
-          bgcolor: alpha(theme.palette.background.paper, 0.7),
-          px: 1,
-          borderRadius: 1,
-        }}
-      >
-        Canvas Mode: Drag cards to rearrange • Click arrows to expand
-      </Typography>
+        <Box 
+            sx={{ 
+                position: 'absolute', 
+                top: 10, 
+                left: 10, 
+                zIndex: 10, 
+                display: 'flex', 
+                gap: 2, 
+                alignItems: 'center' 
+            }}
+        >
+            <Typography 
+                variant="caption" 
+                sx={{ 
+                    color: 'text.secondary',
+                    bgcolor: alpha(theme.palette.background.paper, 0.7),
+                    px: 1,
+                    py: 0.5,
+                    borderRadius: 1,
+                    display: { xs: 'none', sm: 'block' }
+                }}
+            >
+                Canvas Mode: Drag cards to rearrange • Click arrows to expand
+            </Typography>
+
+            <Button
+                variant={gestureEnabled ? 'contained' : 'outlined'}
+                color={gestureEnabled ? 'primary' : 'inherit'}
+                size="small"
+                startIcon={gestureEnabled ? <VideocamIcon /> : <VideocamOffIcon />}
+                onClick={() => setGestureEnabled(!gestureEnabled)}
+                sx={{ 
+                    bgcolor: gestureEnabled ? undefined : alpha(theme.palette.background.paper, 0.7),
+                    backdropFilter: 'blur(4px)'
+                }}
+            >
+                {gestureEnabled ? 'Gestures On' : 'Enable Camera'}
+            </Button>
+      </Box>
+
+      <GestureController enabled={gestureEnabled} />
 
       <DndContext sensors={sensors} onDragEnd={handleDragEnd} modifiers={[restrictToParentElement]}>
         {/* About Card */}
