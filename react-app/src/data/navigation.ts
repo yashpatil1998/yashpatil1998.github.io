@@ -10,6 +10,7 @@ export const navItems: NavItem[] = [
     {label: 'Experience', path: '/experience'},
     {label: 'Projects', path: '/projects'},
     {label: 'Education', path: '/education'},
+    {label: 'Interact', path: '/interact'},
     {label: 'Contact', path: '/contact'},
 ]
 
