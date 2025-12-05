@@ -53,7 +53,13 @@ const AppLayout = () => {
     // Convention: Swipe Left (finger moves right to left) -> Go to Next Page.
     const currentIndex = navItems.findIndex(item => item.path === location.pathname)
     if (currentIndex === -1) return 
-    const nextIndex = (currentIndex + 1) % navItems.length
+    
+    // Skip Interact page in gesture cycle
+    let nextIndex = (currentIndex + 1) % navItems.length
+    if (navItems[nextIndex].path === '/interact') {
+        nextIndex = (nextIndex + 1) % navItems.length
+    }
+    
     navigate(navItems[nextIndex].path)
   }
 
@@ -64,7 +70,13 @@ const AppLayout = () => {
     // Right swipe (hand moves right) -> Go to Previous Tab
     const currentIndex = navItems.findIndex(item => item.path === location.pathname)
     if (currentIndex === -1) return
-    const prevIndex = (currentIndex - 1 + navItems.length) % navItems.length
+    
+    // Skip Interact page in gesture cycle
+    let prevIndex = (currentIndex - 1 + navItems.length) % navItems.length
+    if (navItems[prevIndex].path === '/interact') {
+        prevIndex = (prevIndex - 1 + navItems.length) % navItems.length
+    }
+
     navigate(navItems[prevIndex].path)
   }
 
