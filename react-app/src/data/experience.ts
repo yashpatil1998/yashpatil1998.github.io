@@ -23,7 +23,7 @@ export const experiences: Experience[] = [
             'Building React + TypeScript experiences backed by Go microservices and analytics workloads.',
             'Operating a highly normalised PostgreSQL estate with Liquibase migrations on Google Cloud Platform.',
         ],
-        logo: '/images/msci.svg',
+        logo: 'https://img.logo.dev/msci.com?token=pk_UNjh2tfPRpGeBWAnvuKbAg',
     },
     {
         company: 'Deutsche Bank',
@@ -40,7 +40,7 @@ export const experiences: Experience[] = [
             'Secured API products via mTLS with strong CN binding on GCP load balancers and built a VPA lookup across 10 banks.',
             'Produced Docker Compose blueprints that recreate the complete environment locally in minutes for integration testing.',
         ],
-        logo: '/images/db.gif',
+        logo: 'https://img.logo.dev/db.com?token=pk_UNjh2tfPRpGeBWAnvuKbAg',
     },
     {
         company: 'Deutsche Bank',
@@ -56,7 +56,7 @@ export const experiences: Experience[] = [
             'Rolled out India, SEPA, UK, Russia, and Indonesia payment APIs with resiliency, automation, and globalisation in mind.',
             'Repeatedly recognised through global hackathons and internal innovation programs for security and blockchain work.',
         ],
-        logo: '/images/db.gif',
+        logo: 'https://img.logo.dev/db.com?token=pk_UNjh2tfPRpGeBWAnvuKbAg',
     },
     {
         company: 'Fractal',
@@ -69,7 +69,7 @@ export const experiences: Experience[] = [
             'Reduced travel invoice processing from 20+ hours per week to under one hour using NLP-driven extraction.',
             'Operationalised the pipeline with WorkFusion RPA and Google Cloud Vision for reconciliation against MIS data.',
         ],
-        logo: '/images/fractal.png',
+        logo: 'https://img.logo.dev/fractal.ai?token=pk_UNjh2tfPRpGeBWAnvuKbAg',
     },
     {
         company: 'Xoriant',
@@ -82,7 +82,7 @@ export const experiences: Experience[] = [
             'Developed a generic Hive sink accessible via Thrift, enabling Java services to push batch data into HDFS.',
             'Fine-tuned Hive queries to meet performance expectations across the analytical cluster.',
         ],
-        logo: '/images/xoriant.png',
+        logo: 'https://img.logo.dev/xoriant.com?token=pk_UNjh2tfPRpGeBWAnvuKbAg',
     },
 ]
 

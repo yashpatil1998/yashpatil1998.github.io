@@ -54,12 +54,12 @@ const ExperiencePage = () => (
                             </TimelineDot>
                             {index < experiences.length - 1 && <TimelineConnector />}
                         </TimelineSeparator>
-                        <TimelineContent sx={{py: 2, px: {xs: 0, md: 2}}}>
+                        <TimelineContent sx={{py: 2, px: {xs: 0, md: 2}, textAlign: 'left'}}>
                             <Paper elevation={0} sx={{p: 3, borderRadius: 3, border: (theme) => `1px solid ${theme.palette.divider}`}}>
-                                <Stack spacing={2}>
-                                    <Stack direction="row" spacing={2} alignItems="center">
+                                <Stack spacing={2} alignItems="flex-start">
+                                    <Stack direction="row" spacing={2} alignItems="center" sx={{ width: '100%' }}>
                                         {avatar}
-                                        <Stack spacing={0.5}>
+                                        <Stack spacing={0.5} alignItems="flex-start">
                                             <Typography variant="h6" fontWeight={600}>
                                                 {experience.role}
                                             </Typography>
@@ -74,13 +74,13 @@ const ExperiencePage = () => (
                                             </Typography>
                                         </Stack>
                                     </Stack>
-                                    <Typography variant="body2" color="text.secondary">
+                                    <Typography variant="body2" color="text.secondary" align="left">
                                         {experience.summary}
                                     </Typography>
-                                    <Stack component="ul" spacing={1.5} sx={{pl: 2, mb: 0, mt: 0}}>
+                                    <Stack component="ul" spacing={1.5} sx={{pl: 2, mb: 0, mt: 0, textAlign: 'left'}}>
                                         {experience.highlights.map((highlight) => (
-                                            <Box component="li" key={highlight} sx={{lineHeight: 1.6}}>
-                                                <Typography variant="body2">{highlight}</Typography>
+                                            <Box component="li" key={highlight} sx={{lineHeight: 1.6, textAlign: 'left'}}>
+                                                <Typography variant="body2" align="left">{highlight}</Typography>
                                             </Box>
                                         ))}
                                     </Stack>

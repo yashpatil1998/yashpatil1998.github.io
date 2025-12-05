@@ -7,6 +7,7 @@ import ExperiencePage from './pages/ExperiencePage'
 import HomePage from './pages/HomePage'
 import InteractPage from './pages/InteractPage'
 import ProjectsPage from './pages/ProjectsPage'
+import PublicationsPage from './pages/PublicationsPage'
 import SkillsPage from './pages/SkillsPage'
 
 const App = () => (
@@ -18,6 +19,7 @@ const App = () => (
       <Route path="/skills" element={<SkillsPage />} />
       <Route path="/experience" element={<ExperiencePage />} />
       <Route path="/projects" element={<ProjectsPage />} />
+      <Route path="/publications" element={<PublicationsPage />} />
       <Route path="/education" element={<EducationPage />} />
       <Route path="/contact" element={<ContactPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />

@@ -1,6 +1,5 @@
-import {Box, Chip, LinearProgress, Paper, Stack, Typography} from '@mui/material'
+import {Avatar, Box, Chip, LinearProgress, Paper, Stack, Typography} from '@mui/material'
 import type {Theme} from '@mui/material/styles'
-import CircleIcon from '@mui/icons-material/Circle'
 import {skills} from '../data/skills'
 
 type ChipColor = 'default' | 'primary' | 'secondary' | 'success' | 'info' | 'warning' | 'error'
@@ -49,7 +48,19 @@ const SkillsPage = () => (
                 >
                     <Stack spacing={2}>
                         <Stack direction="row" alignItems="center" spacing={1.5}>
-                            <CircleIcon sx={{color: (theme) => levelStyles[skill.level].icon(theme)}} fontSize="small" />
+                            <Avatar
+                                src={skill.logo}
+                                alt={skill.name}
+                                variant="rounded"
+                                sx={{
+                                    width: 40,
+                                    height: 40,
+                                    bgcolor: 'transparent',
+                                    '& img': {
+                                        objectFit: 'contain',
+                                    },
+                                }}
+                            />
                             <Typography variant="h6" fontWeight={600}>
                                 {skill.name}
                             </Typography>

@@ -25,7 +25,7 @@ const HomePage = () => (
                 I&apos;m Yash Patil
             </Typography>
             <Typography variant="h6" color="rgba(255,255,255,0.85)" fontWeight={400}>
-                Technology analyst with experience across microservices, computer vision, deep learning, and big data projects.
+                Software engineer with experience across microservices, computer vision, deep learning, and big data projects.
             </Typography>
             <Typography variant="body1" color="rgba(255,255,255,0.85)">
                 I build dependable systems, craft data-driven solutions, and love partnering with teams to tackle challenging engineering problems.
