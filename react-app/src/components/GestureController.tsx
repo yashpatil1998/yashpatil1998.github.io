@@ -15,7 +15,7 @@ type GestureControllerProps = {
 }
 
 export const GestureController = ({ enabled, onSwipeLeft, onSwipeRight }: GestureControllerProps) => {
-  const { triggerSwipe } = useGesture()
+  const { triggerSwipe, setIsGrabbing, setHandRotation } = useGesture()
   const webcamRef = useRef<Webcam>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isLoaded, setIsLoaded] = useState(false)
@@ -164,6 +164,22 @@ export const GestureController = ({ enabled, onSwipeLeft, onSwipeRight }: Gestur
       const indexTip = landmarks[8]
       const thumbTip = landmarks[4]
 
+      // Logic: Calculate Hand Rotation (Roll)
+      // Angle between Wrist (0) and Middle Finger MCP (9) or Index (5) to Pinky (17)
+      const indexMCP = landmarks[5]
+      const pinkyMCP = landmarks[17]
+      // Calculate angle in radians. Note: Y increases downwards in canvas coords.
+      // Normal hand position (fingers up): Index is to the left/right of Pinky depending on hand?
+      // Let's use the vector from Index MCP to Pinky MCP to determine palm tilt
+      // Since camera is mirrored, Left is Right.
+      const dx = pinkyMCP.x - indexMCP.x
+      const dy = pinkyMCP.y - indexMCP.y
+      // At rest (palm vertical), this vector is roughly horizontal.
+      // Rotation is deviation from horizontal.
+      const rotation = Math.atan2(dy, dx)
+      setHandRotation(rotation)
+
+
       // Map to screen coordinates
       // Note: Camera is mirrored by default, so we flip X
       const rawX = (1 - indexTip.x) * window.innerWidth
@@ -200,6 +216,11 @@ export const GestureController = ({ enabled, onSwipeLeft, onSwipeRight }: Gestur
       // Calculate distance between thumb and index for "Pinch" gesture
       const distance = Math.hypot(indexTip.x - thumbTip.x, indexTip.y - thumbTip.y)
       const isPinching = distance < 0.05 // Threshold may need tuning
+      
+      // Sync pinch state with context if changed
+      if (isPinching !== isPinchingRef.current) {
+        setIsGrabbing(isPinching)
+      }
 
       // Simulate Pointer Events
       simulatePointerEvent(cursorX, cursorY, isPinching)

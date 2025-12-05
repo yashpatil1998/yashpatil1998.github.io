@@ -3,6 +3,12 @@ import { createContext, useContext, useRef, useState, type ReactNode } from 'rea
 type GestureContextType = {
   gestureEnabled: boolean
   setGestureEnabled: (enabled: boolean) => void
+  isGrabbing: boolean
+  setIsGrabbing: (grabbing: boolean) => void
+  handRotation: number
+  setHandRotation: (rotation: number) => void
+  handOpenness: number
+  setHandOpenness: (openness: number) => void
   triggerSwipe: () => boolean
 }
 
@@ -10,6 +16,9 @@ const GestureContext = createContext<GestureContextType | undefined>(undefined)
 
 export const GestureProvider = ({ children }: { children: ReactNode }) => {
   const [gestureEnabled, setGestureEnabled] = useState(false)
+  const [isGrabbing, setIsGrabbing] = useState(false)
+  const [handRotation, setHandRotation] = useState(0)
+  const [handOpenness, setHandOpenness] = useState(1) // 0 = Closed (Fist), 1 = Open (Palm)
   const lastSwipeTimeRef = useRef(0)
 
   const triggerSwipe = () => {
@@ -22,7 +31,17 @@ export const GestureProvider = ({ children }: { children: ReactNode }) => {
   }
 
   return (
-    <GestureContext.Provider value={{ gestureEnabled, setGestureEnabled, triggerSwipe }}>
+    <GestureContext.Provider value={{ 
+      gestureEnabled, 
+      setGestureEnabled, 
+      isGrabbing, 
+      setIsGrabbing, 
+      handRotation,
+      setHandRotation,
+      handOpenness,
+      setHandOpenness,
+      triggerSwipe 
+    }}>
       {children}
     </GestureContext.Provider>
   )

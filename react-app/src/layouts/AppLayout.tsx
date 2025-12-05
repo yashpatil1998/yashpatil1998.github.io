@@ -45,6 +45,9 @@ const AppLayout = () => {
   }
 
   const handleSwipeLeft = () => {
+    // Disable global navigation on the Interact page
+    if (location.pathname === '/interact') return
+
     // Left swipe (hand moves left) -> Go to Next Tab (conceptually pushing content left to reveal next)
     // OR: Left swipe -> Go Back?
     // Convention: Swipe Left (finger moves right to left) -> Go to Next Page.
@@ -55,6 +58,9 @@ const AppLayout = () => {
   }
 
   const handleSwipeRight = () => {
+    // Disable global navigation on the Interact page
+    if (location.pathname === '/interact') return
+
     // Right swipe (hand moves right) -> Go to Previous Tab
     const currentIndex = navItems.findIndex(item => item.path === location.pathname)
     if (currentIndex === -1) return
@@ -149,16 +155,18 @@ const AppLayout = () => {
             })}
           </Stack>
           
-          <Tooltip title={gestureEnabled ? "Disable Gestures" : "Enable Gestures"}>
-            <IconButton 
-                onClick={() => setGestureEnabled(!gestureEnabled)} 
-                color={gestureEnabled ? "primary" : "inherit"}
-                aria-label="toggle gestures"
-                sx={{ mr: 1 }}
-            >
-                {gestureEnabled ? <VideocamIcon /> : <VideocamOffIcon />}
-            </IconButton>
-          </Tooltip>
+          {location.pathname !== '/interact' && (
+            <Tooltip title={gestureEnabled ? "Disable Gestures" : "Enable Gestures"}>
+              <IconButton 
+                  onClick={() => setGestureEnabled(!gestureEnabled)} 
+                  color={gestureEnabled ? "primary" : "inherit"}
+                  aria-label="toggle gestures"
+                  sx={{ mr: 1 }}
+              >
+                  {gestureEnabled ? <VideocamIcon /> : <VideocamOffIcon />}
+              </IconButton>
+            </Tooltip>
+          )}
 
           <IconButton onClick={toggleColorMode} color="inherit" aria-label="toggle dark mode">
             {mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}

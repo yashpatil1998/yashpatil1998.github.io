@@ -1,88 +1,168 @@
-import { DndContext, type DragEndEvent, MouseSensor, TouchSensor, useSensor, useSensors, PointerSensor } from '@dnd-kit/core'
-import { restrictToParentElement } from '@dnd-kit/modifiers'
-import UnfoldLessIcon from '@mui/icons-material/UnfoldLess'
-import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore'
-import { Box, Chip, Divider, IconButton, List, ListItem, Stack, Typography, alpha, useTheme } from '@mui/material'
-import { useState } from 'react'
-import { DraggableCard } from '../components/DraggableCard'
-import { education } from '../data/education'
-import { experiences } from '../data/experience'
-import { projects } from '../data/projects'
-import { skills } from '../data/skills'
-import { publications } from '../data/publications'
+import { useRef, useMemo } from 'react'
+import { Canvas, useFrame } from '@react-three/fiber'
+import { OrbitControls } from '@react-three/drei'
+import * as THREE from 'three'
+import { Box, Button, Typography, useTheme } from '@mui/material'
+import VideocamIcon from '@mui/icons-material/Videocam'
+import VideocamOffIcon from '@mui/icons-material/VideocamOff'
 import { useGesture } from '../context/GestureContext'
 
-type Position = {
-  x: number
-  y: number
-}
-
-const CardHeader = ({ title, isExpanded, onToggle }: { title: string, isExpanded: boolean, onToggle: () => void }) => (
-  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-    <Typography variant="h6" sx={{ m: 0 }}>{title}</Typography>
-    <IconButton 
-      size="small" 
-      onClick={(e) => { 
-        e.stopPropagation()
-        onToggle()
-      }} 
-      onPointerDown={(e) => e.stopPropagation()}
-      aria-label={isExpanded ? "Collapse" : "Expand"}
-    >
-      {isExpanded ? <UnfoldLessIcon /> : <UnfoldMoreIcon />}
-    </IconButton>
-  </Box>
-)
-
-const InteractPage = () => {
+const SaturnParticles = () => {
+  const ref = useRef<THREE.Points>(null)
   const theme = useTheme()
-  const { gestureEnabled } = useGesture()
-  const [positions, setPositions] = useState<Record<string, Position>>(() => {
-    const isMobile = window.innerWidth < 900
-    if (isMobile) {
-        return {
-            about: { x: 20, y: 20 },
-            skills: { x: 20, y: 400 },
-            experience: { x: 20, y: 800 },
-            projects: { x: 20, y: 1200 },
-            education: { x: 20, y: 1600 },
-            publications: { x: 20, y: 2000 },
-            contact: { x: 20, y: 2400 },
-        }
+  const { isGrabbing, handRotation } = useGesture()
+  
+  // Generate base data (Base Positions + Expansion Vectors + Colors)
+  const { basePositions, colors, expansionVectors } = useMemo(() => {
+    const count = 5000
+    const positions = new Float32Array(count * 3)
+    const expVectors = new Float32Array(count * 3)
+    const cols = new Float32Array(count * 3)
+    
+    const baseColor = new THREE.Color(theme.palette.primary.main)
+    const ringColor = new THREE.Color(theme.palette.secondary.main)
+
+    for (let i = 0; i < count; i++) {
+      const isRing = Math.random() > 0.4 
+      let x, y, z
+
+      if (isRing) {
+        const innerRadius = 3
+        const outerRadius = 6
+        const radius = innerRadius + Math.random() * (outerRadius - innerRadius)
+        const theta = Math.random() * Math.PI * 2
+        x = radius * Math.cos(theta)
+        y = (Math.random() - 0.5) * 0.2
+        z = radius * Math.sin(theta)
+        
+        cols[i * 3] = ringColor.r
+        cols[i * 3 + 1] = ringColor.g
+        cols[i * 3 + 2] = ringColor.b
+      } else {
+        const radius = 2
+        const theta = Math.random() * Math.PI * 2
+        const phi = Math.acos(2 * Math.random() - 1)
+        x = radius * Math.sin(phi) * Math.cos(theta)
+        y = radius * Math.sin(phi) * Math.sin(theta)
+        z = radius * Math.cos(phi)
+        
+        cols[i * 3] = baseColor.r
+        cols[i * 3 + 1] = baseColor.g
+        cols[i * 3 + 2] = baseColor.b
+      }
+
+      // Base position
+      positions[i * 3] = x
+      positions[i * 3 + 1] = y
+      positions[i * 3 + 2] = z
+
+      // Expansion Vector (Random Direction * Speed)
+      // Use normalized position as direction + noise
+      const length = Math.sqrt(x*x + y*y + z*z) || 1
+      const nx = x / length
+      const ny = y / length
+      const nz = z / length
+      
+      const speed = 5 + Math.random() * 5 // Expand out to 5-10 units away
+      expVectors[i * 3] = nx * speed
+      expVectors[i * 3 + 1] = ny * speed + (Math.random() - 0.5) * 2 // Add vertical chaos
+      expVectors[i * 3 + 2] = nz * speed
     }
-    return {
-        about: { x: 50, y: 20 },
-        skills: { x: 400, y: 20 },
-        experience: { x: 50, y: 350 },
-        projects: { x: 400, y: 350 },
-        education: { x: 750, y: 20 },
-        publications: { x: 750, y: 350 },
-        contact: { x: 50, y: 680 },
+
+    return { basePositions: positions, colors: cols, expansionVectors: expVectors }
+  }, [theme.palette.mode, theme.palette.primary.main, theme.palette.secondary.main])
+
+  // Current positions (mutable)
+  const currentPositions = useMemo(() => new Float32Array(basePositions), [basePositions])
+  
+  // Store the current expansion factor to smooth the transition
+  const expansionRef = useRef(1) // Start expanded
+
+  useFrame((state) => {
+    if (!ref.current) return
+
+    const { pointer } = state
+    const time = state.clock.getElapsedTime()
+    
+    // Interaction Logic
+    // isGrabbing = true (Fist/Pinch) -> Collapse (Target 0)
+    // isGrabbing = false (Open Hand) -> Expand (Target 1)
+    // We use linear interpolation (lerp) to smooth the transition
+    const targetExpansion = isGrabbing ? 0 : 1
+    
+    // Smoothly move current expansion factor towards target
+    expansionRef.current = THREE.MathUtils.lerp(expansionRef.current, targetExpansion, 0.05)
+    const expansionFactor = expansionRef.current
+
+    // Access geometry attribute
+    const geometry = ref.current.geometry
+    const positionAttribute = geometry.attributes.position as THREE.BufferAttribute
+    const posArray = positionAttribute.array as Float32Array
+
+    // Update positions
+    for (let i = 0; i < basePositions.length; i += 3) {
+      const bx = basePositions[i]
+      const by = basePositions[i + 1]
+      const bz = basePositions[i + 2]
+
+      const ex = expansionVectors[i]
+      const ey = expansionVectors[i + 1]
+      const ez = expansionVectors[i + 2]
+
+      // Target = Base + Expansion * Factor
+      // Add some rotation noise to expansion
+      const noise = Math.sin(time + i) * 0.1 * expansionFactor
+
+      const tx = bx + ex * expansionFactor + noise
+      const ty = by + ey * expansionFactor + noise
+      const tz = bz + ez * expansionFactor + noise
+
+      // Lerp current to target for smooth transition
+      posArray[i] += (tx - posArray[i]) * 0.1
+      posArray[i + 1] += (ty - posArray[i + 1]) * 0.1
+      posArray[i + 2] += (tz - posArray[i + 2]) * 0.1
     }
+
+    positionAttribute.needsUpdate = true
+
+    // Rotate entire system based on hand rotation (Roll)
+    // Default automatic rotation is added to hand rotation
+    ref.current.rotation.z = THREE.MathUtils.lerp(ref.current.rotation.z, -handRotation, 0.1)
+    
+    // Subtle auto-rotation on Y axis for depth effect
+    ref.current.rotation.y += 0.002
+    
+    // Tilt X based on pointer vertical position for 3D feel
+    ref.current.rotation.x = THREE.MathUtils.lerp(ref.current.rotation.x, -pointer.y * 0.2, 0.05)
   })
 
-  const [expandedId, setExpandedId] = useState<string | null>(null)
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } })
+  return (
+    <points ref={ref}>
+      <bufferGeometry>
+        <bufferAttribute
+          attach="attributes-position"
+          args={[currentPositions, 3]}
+        />
+        <bufferAttribute
+          attach="attributes-color"
+          args={[colors, 3]}
+        />
+      </bufferGeometry>
+      <pointsMaterial
+        size={0.05}
+        vertexColors={true}
+        sizeAttenuation={true}
+        depthWrite={false}
+        transparent
+        blending={THREE.NormalBlending}
+      />
+    </points>
   )
+}
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, delta } = event
-    setPositions((prev) => ({
-      ...prev,
-      [active.id]: {
-        x: prev[active.id as string].x + delta.x,
-        y: prev[active.id as string].y + delta.y,
-      },
-    }))
-  }
-
-  const toggleExpand = (id: string) => {
-    setExpandedId((prev) => (prev === id ? null : id))
-  }
+const InteractPage = () => {
+  const { gestureEnabled, setGestureEnabled } = useGesture()
+  const theme = useTheme()
 
   return (
     <Box 
@@ -90,160 +170,39 @@ const InteractPage = () => {
         width: '100%', 
         height: 'calc(100vh - 150px)', 
         position: 'relative', 
-        overflow: 'hidden', 
+        bgcolor: 'background.paper',
+        borderRadius: 2,
+        overflow: 'hidden',
         border: `1px solid ${theme.palette.divider}`,
-        borderRadius: 2, 
-        bgcolor: 'background.default',
-        backgroundImage: `radial-gradient(${alpha(theme.palette.text.secondary, 0.2)} 1px, transparent 1px)`,
-        backgroundSize: '20px 20px',
       }}
     >
-        <Box 
-            sx={{ 
-                position: 'absolute', 
-                top: 10, 
-                left: 10, 
-                zIndex: 10, 
-                display: 'flex', 
-                gap: 2, 
-                alignItems: 'center' 
-            }}
+      <Box sx={{ position: 'absolute', top: 20, left: 20, zIndex: 10 }}>
+        <Typography variant="h5" gutterBottom>
+          Interactive Saturn
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Enable gestures: 
+          <br/>• <strong>Pinch/Fist</strong>: Collapse to form Saturn
+          <br/>• <strong>Open Hand</strong>: Explode particles
+          <br/>• <strong>Rotate Hand</strong>: Rotate Planet
+        </Typography>
+        <Button
+            variant={gestureEnabled ? 'contained' : 'outlined'}
+            color={gestureEnabled ? 'primary' : 'inherit'}
+            startIcon={gestureEnabled ? <VideocamIcon /> : <VideocamOffIcon />}
+            onClick={() => setGestureEnabled(!gestureEnabled)}
+            sx={{ mt: 2 }}
         >
-            <Typography 
-                variant="caption" 
-                sx={{ 
-                    color: 'text.secondary',
-                    bgcolor: alpha(theme.palette.background.paper, 0.7),
-                    px: 1,
-                    py: 0.5,
-                    borderRadius: 1,
-                    display: { xs: 'none', sm: 'block' }
-                }}
-            >
-                Canvas Mode: Drag cards to rearrange • Click arrows to expand {gestureEnabled && '• Pinch to Drag'}
-            </Typography>
+            {gestureEnabled ? 'Gestures Enabled' : 'Enable Gestures'}
+        </Button>
       </Box>
 
-      <DndContext sensors={sensors} onDragEnd={handleDragEnd} modifiers={[restrictToParentElement]}>
-        {/* About Card */}
-        <DraggableCard id="about" left={positions.about.x} top={positions.about.y} expanded={expandedId === 'about'}>
-            <CardHeader title="About" isExpanded={expandedId === 'about'} onToggle={() => toggleExpand('about')} />
-            <Divider sx={{ mb: 1 }} />
-            <Typography variant="body2" paragraph>
-                Implementing technology solutions for a FinTech, I'm seasoned in Microservices, UI, CI/CD, Test Automation and Infrastructure.
-            </Typography>
-            <Typography variant="body2" paragraph>
-                At MSCI, I am a part of Wealth Management Team, where I am building features as a part of the MSCI Wealth Manager application, majorly focusing on reallocation of assets.
-            </Typography>
-            {expandedId === 'about' && (
-               <Typography variant="body2" color="text.secondary">
-                 In Deutsche Bank, I was a part of Contextual Banking (Banking as a Service), where I built Synthix, a marketplace for financial institutions.
-                 Previously, I have researched and shipped projects that span computer vision, natural language processing, deep learning, and big data systems.
-               </Typography>
-            )}
-        </DraggableCard>
-
-        {/* Skills Card */}
-        <DraggableCard id="skills" left={positions.skills.x} top={positions.skills.y} expanded={expandedId === 'skills'}>
-            <CardHeader title="Skills" isExpanded={expandedId === 'skills'} onToggle={() => toggleExpand('skills')} />
-            <Divider sx={{ mb: 1 }} />
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                {(expandedId === 'skills' ? skills : skills.slice(0, 6)).map((skill) => (
-                    <Chip 
-                        key={skill.name} 
-                        label={skill.name} 
-                        size="small" 
-                        variant={skill.level === 'Advanced' ? 'filled' : 'outlined'} 
-                        color={skill.level === 'Advanced' ? 'primary' : 'default'} 
-                    />
-                ))}
-            </Box>
-        </DraggableCard>
-
-        {/* Experience Card */}
-        <DraggableCard id="experience" left={positions.experience.x} top={positions.experience.y} expanded={expandedId === 'experience'}>
-            <CardHeader title="Experience" isExpanded={expandedId === 'experience'} onToggle={() => toggleExpand('experience')} />
-            <Divider sx={{ mb: 1 }} />
-            <List dense disablePadding>
-                {(expandedId === 'experience' ? experiences : experiences.slice(0, 2)).map((exp, i) => (
-                    <ListItem key={i} disablePadding sx={{ mb: 1, display: 'block' }}>
-                         <Typography variant="subtitle2">{exp.role}</Typography>
-                         <Typography variant="caption" color="text.secondary">{exp.company} • {exp.start} - {exp.end}</Typography>
-                         {expandedId === 'experience' && (
-                             <Box sx={{ mt: 0.5, pl: 1, borderLeft: `2px solid ${theme.palette.divider}` }}>
-                                <Typography variant="caption" display="block">{exp.summary}</Typography>
-                             </Box>
-                         )}
-                    </ListItem>
-                ))}
-            </List>
-        </DraggableCard>
-
-        {/* Projects Card */}
-        <DraggableCard id="projects" left={positions.projects.x} top={positions.projects.y} expanded={expandedId === 'projects'}>
-            <CardHeader title="Projects" isExpanded={expandedId === 'projects'} onToggle={() => toggleExpand('projects')} />
-            <Divider sx={{ mb: 1 }} />
-             <List dense disablePadding>
-                {(expandedId === 'projects' ? projects : projects.slice(0, 2)).map((proj, i) => (
-                    <ListItem key={i} disablePadding sx={{ mb: 1, display: 'block' }}>
-                         <Typography variant="subtitle2">{proj.name}</Typography>
-                         <Typography variant="caption" color="text.secondary" noWrap={expandedId !== 'projects'} sx={{ display: 'block' }}>{proj.description}</Typography>
-                    </ListItem>
-                ))}
-            </List>
-        </DraggableCard>
-
-        {/* Education Card */}
-        <DraggableCard id="education" left={positions.education.x} top={positions.education.y} expanded={expandedId === 'education'}>
-             <CardHeader title="Education" isExpanded={expandedId === 'education'} onToggle={() => toggleExpand('education')} />
-             <Divider sx={{ mb: 1 }} />
-             {(expandedId === 'education' ? education : education.slice(0, 1)).map((edu, i) => (
-                 <Box key={i} sx={{ mb: 1 }}>
-                     <Typography variant="subtitle2">{edu.program}</Typography>
-                     <Typography variant="caption" color="text.secondary">{edu.institution}</Typography>
-                     {expandedId === 'education' && edu.details.length > 0 && (
-                         <Box sx={{ mt: 0.5, pl: 1, borderLeft: `2px solid ${theme.palette.divider}` }}>
-                             <Typography variant="caption" display="block" color="text.secondary">
-                                 {edu.details.join(' • ')}
-                             </Typography>
-                         </Box>
-                     )}
-                 </Box>
-             ))}
-        </DraggableCard>
-
-        {/* Publications Card */}
-        <DraggableCard id="publications" left={positions.publications.x} top={positions.publications.y} expanded={expandedId === 'publications'}>
-            <CardHeader title="Publications" isExpanded={expandedId === 'publications'} onToggle={() => toggleExpand('publications')} />
-            <Divider sx={{ mb: 1 }} />
-            <List dense disablePadding>
-                {(expandedId === 'publications' ? publications : publications.slice(0, 2)).map((pub, i) => (
-                    <ListItem key={i} disablePadding sx={{ mb: 1, display: 'block' }}>
-                         <Typography variant="subtitle2" component="a" href={pub.url} target="_blank" sx={{ textDecoration: 'none', color: 'inherit', '&:hover': { color: 'primary.main' } }}>
-                            {pub.title}
-                         </Typography>
-                         <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>{pub.venue} • {pub.year}</Typography>
-                    </ListItem>
-                ))}
-            </List>
-        </DraggableCard>
-
-        {/* Contact Card */}
-        <DraggableCard id="contact" left={positions.contact.x} top={positions.contact.y} expanded={expandedId === 'contact'}>
-            <CardHeader title="Contact" isExpanded={expandedId === 'contact'} onToggle={() => toggleExpand('contact')} />
-            <Divider sx={{ mb: 1 }} />
-            <Stack spacing={0.5}>
-                <Typography variant="body2">Pune, India</Typography>
-                <Typography variant="body2" component="a" href="mailto:yashpatil1998@gmail.com" sx={{ textDecoration: 'none', color: 'primary.main' }}>
-                    Email Me
-                </Typography>
-                <Typography variant="body2" component="a" href="https://linkedin.com/in/yashpatil1998" target="_blank" sx={{ textDecoration: 'none', color: 'primary.main' }}>
-                    LinkedIn
-                </Typography>
-            </Stack>
-        </DraggableCard>
-
-      </DndContext>
+      <Canvas camera={{ position: [0, 0, 12], fov: 60 }}>
+        <color attach="background" args={[theme.palette.background.paper]} />
+        <ambientLight intensity={0.5} />
+        <SaturnParticles />
+        <OrbitControls enableZoom={false} enablePan={false} enableRotate={false} />
+      </Canvas>
     </Box>
   )
 }
