@@ -38,14 +38,28 @@ const CardHeader = ({ title, isExpanded, onToggle }: { title: string, isExpanded
 
 const InteractPage = () => {
   const theme = useTheme()
-  const [positions, setPositions] = useState<Record<string, Position>>({
-    about: { x: 50, y: 20 },
-    skills: { x: 400, y: 20 },
-    experience: { x: 50, y: 350 },
-    projects: { x: 400, y: 350 },
-    education: { x: 750, y: 20 },
-    publications: { x: 750, y: 350 },
-    contact: { x: 50, y: 680 },
+  const [positions, setPositions] = useState<Record<string, Position>>(() => {
+    const isMobile = window.innerWidth < 900
+    if (isMobile) {
+        return {
+            about: { x: 20, y: 20 },
+            skills: { x: 20, y: 400 },
+            experience: { x: 20, y: 800 },
+            projects: { x: 20, y: 1200 },
+            education: { x: 20, y: 1600 },
+            publications: { x: 20, y: 2000 },
+            contact: { x: 20, y: 2400 },
+        }
+    }
+    return {
+        about: { x: 50, y: 20 },
+        skills: { x: 400, y: 20 },
+        experience: { x: 50, y: 350 },
+        projects: { x: 400, y: 350 },
+        education: { x: 750, y: 20 },
+        publications: { x: 750, y: 350 },
+        contact: { x: 50, y: 680 },
+    }
   })
 
   const [expandedId, setExpandedId] = useState<string | null>(null)
