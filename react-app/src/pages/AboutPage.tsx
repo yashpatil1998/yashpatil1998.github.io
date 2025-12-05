@@ -4,9 +4,9 @@ import {Box, Button, List, ListItem, ListItemIcon, ListItemText, Paper, Stack, T
 import {useEffect} from 'react'
 
 const focusAreas = [
-    'Microservices and scalable backend architecture',
-    'Computer vision and deep learning experiments that deliver real-world impact',
-    'Data engineering across big data ecosystems with strong automation practices',
+    'Microservices, UI, CI/CD, Test Automation, and Infrastructure',
+    'Computer vision and deep learning implementations with real-world impact',
+    'Data engineering across big data ecosystems',
 ]
 
 const AboutPage = () => {
@@ -37,13 +37,22 @@ const AboutPage = () => {
             <Paper elevation={0} sx={{p: {xs: 3, md: 4}, borderRadius: 3, border: (theme) => `1px solid ${theme.palette.divider}`}}>
                 <Stack spacing={2}>
                     <Typography variant="body1">
-                        Hi, I&apos;m Yash Patil. I currently work as a Technology Analyst at Deutsche Bank within the Corporate Banking Technology group. My work bridges platform modernization, distributed systems, and data-intensive applications to support mission-critical financial services.
+                        Implementing technology solutions for a FinTech, I'm seasoned in Microservices, UI, CI/CD, Test Automation, and Infrastructure.
                     </Typography>
                     <Typography variant="body1">
-                        Previously, I have researched and shipped projects that span computer vision, natural language processing, deep learning, and big data systems. Regardless of the stack, I enjoy collaborating with teams, iterating quickly, and shipping reliable software that solves business problems.
+                        At MSCI, I am a part of the Wealth Management Team, where I am building features as part of the MSCI Wealth Manager application, majorly focusing on the reallocation of assets, helping clients understand their portfolio returns and optimize taxes and costs.
                     </Typography>
                     <Typography variant="body1">
-                        A few areas I love diving into:
+                        In Deutsche Bank, I was a part of Contextual Banking (popularly Banking as a Service or Embedded Financing), where I built Synthix, a marketplace for financial institutions and corporates to publish/subscribe to banking products as a service. Previously, I have worked in Corporate Payments Technology, where I contributed to building APIs for payments targeting multiple regions like India and SEPA.
+                    </Typography>
+                    <Typography variant="body1">
+                        During my internship tenure and academic research publications, I've worked on NLP, Deep Learning, Computer Vision, and Big Data-based implementations.
+                    </Typography>
+                    <Typography variant="body1">
+                        Feel free to get in touch and extend our professional network.
+                    </Typography>
+                    <Typography variant="body1">
+                        A few areas I focus on:
                     </Typography>
                     <List disablePadding>
                         {focusAreas.map((area) => (
@@ -55,9 +64,6 @@ const AboutPage = () => {
                             </ListItem>
                         ))}
                     </List>
-                    <Typography variant="body1">
-                        Outside of work, you can usually find me learning new tools, mentoring teammates, or tinkering with ideas that merge technology and meaningful user experiences.
-                    </Typography>
                     <Stack direction={{xs: 'column', sm: 'row'}} spacing={2} justifyContent="flex-start" alignItems="stretch">
                         <Box
                             sx={{

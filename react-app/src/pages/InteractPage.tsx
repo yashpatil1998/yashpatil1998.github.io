@@ -12,6 +12,7 @@ import { education } from '../data/education'
 import { experiences } from '../data/experience'
 import { projects } from '../data/projects'
 import { skills } from '../data/skills'
+import { publications } from '../data/publications'
 
 type Position = {
   x: number
@@ -43,7 +44,8 @@ const InteractPage = () => {
     experience: { x: 50, y: 350 },
     projects: { x: 400, y: 350 },
     education: { x: 750, y: 20 },
-    contact: { x: 750, y: 350 },
+    publications: { x: 750, y: 350 },
+    contact: { x: 50, y: 680 },
   })
 
   const [expandedId, setExpandedId] = useState<string | null>(null)
@@ -132,15 +134,15 @@ const InteractPage = () => {
             <CardHeader title="About" isExpanded={expandedId === 'about'} onToggle={() => toggleExpand('about')} />
             <Divider sx={{ mb: 1 }} />
             <Typography variant="body2" paragraph>
-                Hi, I'm Yash Patil. I currently work as a Technology Analyst at Deutsche Bank.
+                Implementing technology solutions for a FinTech, I'm seasoned in Microservices, UI, CI/CD, Test Automation and Infrastructure.
             </Typography>
             <Typography variant="body2" paragraph>
-                I build scalable backend architectures and experiment with deep learning.
+                At MSCI, I am a part of Wealth Management Team, where I am building features as a part of the MSCI Wealth Manager application, majorly focusing on reallocation of assets.
             </Typography>
             {expandedId === 'about' && (
                <Typography variant="body2" color="text.secondary">
-                 My work bridges platform modernization, distributed systems, and data-intensive applications. 
-                 Outside of work, I enjoy mentoring and tinkering with new tech.
+                 In Deutsche Bank, I was a part of Contextual Banking (Banking as a Service), where I built Synthix, a marketplace for financial institutions.
+                 Previously, I have researched and shipped projects that span computer vision, natural language processing, deep learning, and big data systems.
                </Typography>
             )}
         </DraggableCard>
@@ -199,12 +201,35 @@ const InteractPage = () => {
         <DraggableCard id="education" left={positions.education.x} top={positions.education.y} expanded={expandedId === 'education'}>
              <CardHeader title="Education" isExpanded={expandedId === 'education'} onToggle={() => toggleExpand('education')} />
              <Divider sx={{ mb: 1 }} />
-             {education.map((edu, i) => (
+             {(expandedId === 'education' ? education : education.slice(0, 1)).map((edu, i) => (
                  <Box key={i} sx={{ mb: 1 }}>
                      <Typography variant="subtitle2">{edu.program}</Typography>
                      <Typography variant="caption" color="text.secondary">{edu.institution}</Typography>
+                     {expandedId === 'education' && edu.details.length > 0 && (
+                         <Box sx={{ mt: 0.5, pl: 1, borderLeft: `2px solid ${theme.palette.divider}` }}>
+                             <Typography variant="caption" display="block" color="text.secondary">
+                                 {edu.details.join(' • ')}
+                             </Typography>
+                         </Box>
+                     )}
                  </Box>
              ))}
+        </DraggableCard>
+
+        {/* Publications Card */}
+        <DraggableCard id="publications" left={positions.publications.x} top={positions.publications.y} expanded={expandedId === 'publications'}>
+            <CardHeader title="Publications" isExpanded={expandedId === 'publications'} onToggle={() => toggleExpand('publications')} />
+            <Divider sx={{ mb: 1 }} />
+            <List dense disablePadding>
+                {(expandedId === 'publications' ? publications : publications.slice(0, 2)).map((pub, i) => (
+                    <ListItem key={i} disablePadding sx={{ mb: 1, display: 'block' }}>
+                         <Typography variant="subtitle2" component="a" href={pub.url} target="_blank" sx={{ textDecoration: 'none', color: 'inherit', '&:hover': { color: 'primary.main' } }}>
+                            {pub.title}
+                         </Typography>
+                         <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>{pub.venue} • {pub.year}</Typography>
+                    </ListItem>
+                ))}
+            </List>
         </DraggableCard>
 
         {/* Contact Card */}
