@@ -99,11 +99,16 @@ const InteractPage = () => {
         const { beta, gamma } = event // beta: front-back, gamma: left-right
         if (beta !== null && gamma !== null) {
             // Normalize tilt to gravity vector
-            // Gamma (left/right) affects X gravity
-            // Beta (front/back) affects Y gravity
-            // Clamping to avoid extreme speeds
+            // Gamma (left/right) affects X gravity. 
+            // Holding phone upright (portrait): Gamma is tilt L/R
             gravity.x = Math.min(Math.max(gamma / 45, -1), 1) * 0.5
-            gravity.y = Math.min(Math.max(beta / 45, -1), 1) * 0.5
+            
+            // Beta (front/back) affects Y gravity.
+            // Holding phone upright (portrait): Beta is ~90 degrees. 
+            // Tiling forward (away) decreases beta towards 0. Tilting back (towards) increases > 90.
+            // We want "neutral" to be roughly 45-60 degrees (comfortable viewing angle).
+            const neutralBeta = 45
+            gravity.y = Math.min(Math.max((beta - neutralBeta) / 45, -1), 1) * 0.5
         }
     }
 
@@ -120,12 +125,31 @@ const InteractPage = () => {
     window.addEventListener('deviceorientation', handleOrientation)
     if (!isMobile) window.addEventListener('mousemove', handleMouseMove)
 
+    // Debug overlay for mobile testing (remove in production)
+    /*
+    const debugDiv = document.createElement('div')
+    debugDiv.style.position = 'fixed'
+    debugDiv.style.top = '10px'
+    debugDiv.style.left = '10px'
+    debugDiv.style.zIndex = '9999'
+    debugDiv.style.background = 'rgba(0,0,0,0.7)'
+    debugDiv.style.color = 'white'
+    debugDiv.style.padding = '5px'
+    debugDiv.id = 'gravity-debug'
+    if (gravityEnabled && isMobile && !document.getElementById('gravity-debug')) {
+        document.body.appendChild(debugDiv)
+    }
+    */
+
     const animate = (time: number) => {
         const deltaTime = time - lastTime
         lastTime = time
 
         // Only update if we have significant time step (cap at 60fps approx)
         if (deltaTime > 16) {
+            // const debugEl = document.getElementById('gravity-debug')
+            // if (debugEl) debugEl.innerText = `X: ${gravity.x.toFixed(3)} Y: ${gravity.y.toFixed(3)}`
+
             setPositions(prevPositions => {
                 const nextPositions = { ...prevPositions }
                 const containerWidth = containerRef.current?.clientWidth || window.innerWidth
@@ -195,19 +219,29 @@ const InteractPage = () => {
   }, [gravityEnabled, expandedId, isMobile])
 
   const toggleGravity = async () => {
-    if (!gravityEnabled && typeof DeviceOrientationEvent !== 'undefined' && (DeviceOrientationEvent as any).requestPermission) {
-        try {
-            const permissionState = await (DeviceOrientationEvent as any).requestPermission()
-            if (permissionState === 'granted') {
-                setGravityEnabled(true)
+    if (!gravityEnabled) {
+        // Check for iOS 13+ DeviceOrientation permission
+        if (
+            typeof DeviceOrientationEvent !== 'undefined' && 
+            typeof (DeviceOrientationEvent as any).requestPermission === 'function'
+        ) {
+            try {
+                const permissionState = await (DeviceOrientationEvent as any).requestPermission()
+                if (permissionState === 'granted') {
+                    setGravityEnabled(true)
+                } else {
+                    alert('Permission to access device orientation was denied.')
+                }
+            } catch (error) {
+                console.error(error)
+                // Fallback or error handling
             }
-        } catch (error) {
-            console.error(error)
-            // Fallback for non-iOS or if permission fails
+        } else {
+            // Non-iOS 13+ devices
             setGravityEnabled(true)
         }
     } else {
-        setGravityEnabled(!gravityEnabled)
+        setGravityEnabled(false)
     }
   }
 
