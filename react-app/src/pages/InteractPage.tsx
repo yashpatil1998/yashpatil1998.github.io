@@ -10,7 +10,7 @@ import { useGesture } from '../context/GestureContext'
 const SaturnParticles = () => {
   const ref = useRef<THREE.Points>(null)
   const theme = useTheme()
-  const { isGrabbing, handRotation } = useGesture()
+  const { handRotation, handOpenness } = useGesture()
   
   // Generate base data (Base Positions + Expansion Vectors + Colors)
   const { basePositions, colors, expansionVectors } = useMemo(() => {
@@ -85,13 +85,12 @@ const SaturnParticles = () => {
     const time = state.clock.getElapsedTime()
     
     // Interaction Logic
-    // isGrabbing = true (Fist/Pinch) -> Collapse (Target 0)
-    // isGrabbing = false (Open Hand) -> Expand (Target 1)
-    // We use linear interpolation (lerp) to smooth the transition
-    const targetExpansion = isGrabbing ? 0 : 1
+    // handOpenness: 0 (Closed/Fist) -> Collapse (Target 0)
+    // handOpenness: 1 (Open Hand) -> Expand (Target 1)
+    // Use handOpenness directly as the target expansion factor
     
     // Smoothly move current expansion factor towards target
-    expansionRef.current = THREE.MathUtils.lerp(expansionRef.current, targetExpansion, 0.05)
+    expansionRef.current = THREE.MathUtils.lerp(expansionRef.current, handOpenness, 0.1)
     const expansionFactor = expansionRef.current
 
     // Access geometry attribute
@@ -182,8 +181,8 @@ const InteractPage = () => {
         </Typography>
         <Typography variant="body2" color="text.secondary">
           Enable gestures: 
-          <br/>• <strong>Pinch/Fist</strong>: Collapse to form Saturn
-          <br/>• <strong>Open Hand</strong>: Explode particles
+          <br/>• <strong>Close Fist</strong>: Collapse Saturn
+          <br/>• <strong>Open Hand</strong>: Expand Particles
           <br/>• <strong>Rotate Hand</strong>: Rotate Planet
         </Typography>
         <Button

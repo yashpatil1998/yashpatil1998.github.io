@@ -15,7 +15,7 @@ type GestureControllerProps = {
 }
 
 export const GestureController = ({ enabled, onSwipeLeft, onSwipeRight }: GestureControllerProps) => {
-  const { triggerSwipe, setIsGrabbing, setHandRotation } = useGesture()
+  const { triggerSwipe, setIsGrabbing, setHandRotation, setHandOpenness } = useGesture()
   const webcamRef = useRef<Webcam>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isLoaded, setIsLoaded] = useState(false)
@@ -178,6 +178,36 @@ export const GestureController = ({ enabled, onSwipeLeft, onSwipeRight }: Gestur
       // Rotation is deviation from horizontal.
       const rotation = Math.atan2(dy, dx)
       setHandRotation(rotation)
+
+      // Logic: Calculate Hand Openness
+      // Measure distance between finger tips and wrist
+      // 0 = Wrist
+      // 4 = Thumb Tip, 8 = Index Tip, 12 = Middle Tip, 16 = Ring Tip, 20 = Pinky Tip
+      const wrist = landmarks[0]
+      const tips = [landmarks[4], landmarks[8], landmarks[12], landmarks[16], landmarks[20]]
+      
+      let totalDistance = 0
+      tips.forEach(tip => {
+        totalDistance += Math.hypot(tip.x - wrist.x, tip.y - wrist.y)
+      })
+      // Normalize approx range: 0.5 (fist) to 2.0 (open hand) depending on depth?
+      // Better: compare against palm size (Wrist to Middle MCP)
+      const palmSize = Math.hypot(landmarks[9].x - wrist.x, landmarks[9].y - wrist.y)
+      // const normalizedOpenness = Math.min(Math.max((totalDistance / palmSize - 3) / 4, 0), 1) // Heuristic tuning
+      // A tighter fist has tips closer to wrist/palm center.
+      // Let's try a simpler metric: Average distance of tips from center of palm (9)
+      const palmCenter = landmarks[9]
+      let tipDistFromPalm = 0
+      tips.forEach(tip => {
+          tipDistFromPalm += Math.hypot(tip.x - palmCenter.x, tip.y - palmCenter.y)
+      })
+      // Open hand: tips are far from MCPs. Closed hand: tips are close.
+      // Dist normalized by palm scale
+      const opennessScore = tipDistFromPalm / palmSize
+      // Empirically: Fist ~ 1.5, Open ~ 4.0
+      const mappedOpenness = Math.min(Math.max((opennessScore - 1.5) / 2.5, 0), 1)
+      
+      setHandOpenness(mappedOpenness)
 
 
       // Map to screen coordinates
