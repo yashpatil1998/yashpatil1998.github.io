@@ -4,10 +4,8 @@ import UnfoldLessIcon from '@mui/icons-material/UnfoldLess'
 import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore'
 import VideocamIcon from '@mui/icons-material/Videocam'
 import VideocamOffIcon from '@mui/icons-material/VideocamOff'
-import ExploreIcon from '@mui/icons-material/Explore'
-import ExploreOffIcon from '@mui/icons-material/ExploreOff'
-import { Box, Button, Chip, Divider, IconButton, List, ListItem, Stack, Typography, alpha, useTheme, useMediaQuery } from '@mui/material'
-import { useState, useEffect, useRef } from 'react'
+import { Box, Button, Chip, Divider, IconButton, List, ListItem, Stack, Typography, alpha, useTheme } from '@mui/material'
+import { useState } from 'react'
 import { DraggableCard } from '../components/DraggableCard'
 import { GestureController } from '../components/GestureController'
 import { education } from '../data/education'
@@ -66,184 +64,6 @@ const InteractPage = () => {
 
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [gestureEnabled, setGestureEnabled] = useState(false)
-  const [gravityEnabled, setGravityEnabled] = useState(false)
-  const containerRef = useRef<HTMLDivElement>(null)
-  const requestRef = useRef<number>(null)
-  const velocitiesRef = useRef<Record<string, { vx: number; vy: number }>>({})
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
-
-  // Initialize velocities
-  useEffect(() => {
-    const initialVelocities: Record<string, { vx: number; vy: number }> = {}
-    Object.keys(positions).forEach(key => {
-        initialVelocities[key] = { vx: 0, vy: 0 }
-    })
-    velocitiesRef.current = initialVelocities
-  }, [])
-
-  // Gravity Physics Loop
-  useEffect(() => {
-    if (!gravityEnabled || !containerRef.current) {
-        if (requestRef.current) {
-            cancelAnimationFrame(requestRef.current)
-        }
-        return
-    }
-
-    let lastTime = performance.now()
-    const gravity = { x: 0, y: 0 }
-    const friction = 0.98
-    const bounce = 0.7
-
-    const handleOrientation = (event: DeviceOrientationEvent) => {
-        const { beta, gamma } = event // beta: front-back, gamma: left-right
-        if (beta !== null && gamma !== null) {
-            // Normalize tilt to gravity vector
-            // Gamma (left/right) affects X gravity. 
-            // Holding phone upright (portrait): Gamma is tilt L/R
-            gravity.x = Math.min(Math.max(gamma / 45, -1), 1) * 0.5
-            
-            // Beta (front/back) affects Y gravity.
-            // Holding phone upright (portrait): Beta is ~90 degrees. 
-            // Tiling forward (away) decreases beta towards 0. Tilting back (towards) increases > 90.
-            // We want "neutral" to be roughly 45-60 degrees (comfortable viewing angle).
-            const neutralBeta = 45
-            gravity.y = Math.min(Math.max((beta - neutralBeta) / 45, -1), 1) * 0.5
-        }
-    }
-
-    // For desktop testing: Mouse movement influences gravity slightly
-    const handleMouseMove = (event: MouseEvent) => {
-        if (!isMobile) {
-            const centerX = window.innerWidth / 2
-            const centerY = window.innerHeight / 2
-            gravity.x = (event.clientX - centerX) / centerX * 0.2
-            gravity.y = (event.clientY - centerY) / centerY * 0.2
-        }
-    }
-
-    window.addEventListener('deviceorientation', handleOrientation)
-    if (!isMobile) window.addEventListener('mousemove', handleMouseMove)
-
-    // Debug overlay for mobile testing (remove in production)
-    /*
-    const debugDiv = document.createElement('div')
-    debugDiv.style.position = 'fixed'
-    debugDiv.style.top = '10px'
-    debugDiv.style.left = '10px'
-    debugDiv.style.zIndex = '9999'
-    debugDiv.style.background = 'rgba(0,0,0,0.7)'
-    debugDiv.style.color = 'white'
-    debugDiv.style.padding = '5px'
-    debugDiv.id = 'gravity-debug'
-    if (gravityEnabled && isMobile && !document.getElementById('gravity-debug')) {
-        document.body.appendChild(debugDiv)
-    }
-    */
-
-    const animate = (time: number) => {
-        const deltaTime = time - lastTime
-        lastTime = time
-
-        // Only update if we have significant time step (cap at 60fps approx)
-        if (deltaTime > 16) {
-            // const debugEl = document.getElementById('gravity-debug')
-            // if (debugEl) debugEl.innerText = `X: ${gravity.x.toFixed(3)} Y: ${gravity.y.toFixed(3)}`
-
-            setPositions(prevPositions => {
-                const nextPositions = { ...prevPositions }
-                const containerWidth = containerRef.current?.clientWidth || window.innerWidth
-                const containerHeight = containerRef.current?.clientHeight || window.innerHeight
-                
-                let hasMovement = false
-
-                Object.keys(nextPositions).forEach(key => {
-                    if (!velocitiesRef.current[key]) velocitiesRef.current[key] = { vx: 0, vy: 0 }
-                    
-                    const pos = nextPositions[key]
-                    const vel = velocitiesRef.current[key]
-
-                    // Apply gravity to velocity
-                    vel.vx += gravity.x
-                    vel.vy += gravity.y
-
-                    // Apply friction
-                    vel.vx *= friction
-                    vel.vy *= friction
-
-                    // Update position
-                    let nextX = pos.x + vel.vx
-                    let nextY = pos.y + vel.vy
-
-                    // Boundary checks (Bounce)
-                    const cardWidth = expandedId === key ? 600 : 300 // Approx width
-                    const cardHeight = expandedId === key ? 400 : 200 // Approx height
-
-                    if (nextX < 0) {
-                        nextX = 0
-                        vel.vx = -vel.vx * bounce
-                    } else if (nextX + cardWidth > containerWidth) {
-                        nextX = containerWidth - cardWidth
-                        vel.vx = -vel.vx * bounce
-                    }
-
-                    if (nextY < 0) {
-                        nextY = 0
-                        vel.vy = -vel.vy * bounce
-                    } else if (nextY + cardHeight > containerHeight) {
-                        nextY = containerHeight - cardHeight
-                        vel.vy = -vel.vy * bounce
-                    }
-
-                    // Update if moved significantly
-                    if (Math.abs(nextX - pos.x) > 0.1 || Math.abs(nextY - pos.y) > 0.1) {
-                        nextPositions[key] = { x: nextX, y: nextY }
-                        hasMovement = true
-                    }
-                })
-
-                return hasMovement ? nextPositions : prevPositions
-            })
-        }
-
-        requestRef.current = requestAnimationFrame(animate)
-    }
-
-    requestRef.current = requestAnimationFrame(animate)
-
-    return () => {
-        window.removeEventListener('deviceorientation', handleOrientation)
-        window.removeEventListener('mousemove', handleMouseMove)
-        if (requestRef.current) cancelAnimationFrame(requestRef.current)
-    }
-  }, [gravityEnabled, expandedId, isMobile])
-
-  const toggleGravity = async () => {
-    if (!gravityEnabled) {
-        // Check for iOS 13+ DeviceOrientation permission
-        if (
-            typeof DeviceOrientationEvent !== 'undefined' && 
-            typeof (DeviceOrientationEvent as any).requestPermission === 'function'
-        ) {
-            try {
-                const permissionState = await (DeviceOrientationEvent as any).requestPermission()
-                if (permissionState === 'granted') {
-                    setGravityEnabled(true)
-                } else {
-                    alert('Permission to access device orientation was denied.')
-                }
-            } catch (error) {
-                console.error(error)
-                // Fallback or error handling
-            }
-        } else {
-            // Non-iOS 13+ devices
-            setGravityEnabled(true)
-        }
-    } else {
-        setGravityEnabled(false)
-    }
-  }
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -268,7 +88,6 @@ const InteractPage = () => {
 
   return (
     <Box 
-      ref={containerRef}
       sx={{ 
         width: '100%', 
         height: 'calc(100vh - 150px)', 
@@ -319,20 +138,6 @@ const InteractPage = () => {
                 }}
             >
                 {gestureEnabled ? 'Gestures On' : 'Enable Camera'}
-            </Button>
-
-            <Button
-                variant={gravityEnabled ? 'contained' : 'outlined'}
-                color={gravityEnabled ? 'secondary' : 'inherit'}
-                size="small"
-                startIcon={gravityEnabled ? <ExploreIcon /> : <ExploreOffIcon />}
-                onClick={toggleGravity}
-                sx={{ 
-                    bgcolor: gravityEnabled ? undefined : alpha(theme.palette.background.paper, 0.7),
-                    backdropFilter: 'blur(4px)'
-                }}
-            >
-                {gravityEnabled ? 'Gravity On' : 'Gravity Mode'}
             </Button>
       </Box>
 
