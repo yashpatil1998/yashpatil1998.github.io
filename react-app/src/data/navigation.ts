@@ -11,7 +11,7 @@ export const navItems: NavItem[] = [
     {label: 'Projects', path: '/projects'},
     {label: 'Publications', path: '/publications'},
     {label: 'Education', path: '/education'},
-    {label: 'Interact', path: '/interact'},
+    {label: 'Canvas', path: '/canvas'},
     {label: 'Contact', path: '/contact'},
 ]
 

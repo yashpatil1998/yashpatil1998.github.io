@@ -14,7 +14,7 @@ const App = () => (
   <Routes>
     <Route element={<AppLayout />}>
       <Route path="/" element={<HomePage />} />
-      <Route path="/interact" element={<InteractPage />} />
+      <Route path="/canvas" element={<InteractPage />} />
       <Route path="/about" element={<AboutPage />} />
       <Route path="/skills" element={<SkillsPage />} />
       <Route path="/experience" element={<ExperiencePage />} />
