@@ -2,17 +2,15 @@ import { DndContext, type DragEndEvent, MouseSensor, TouchSensor, useSensor, use
 import { restrictToParentElement } from '@dnd-kit/modifiers'
 import UnfoldLessIcon from '@mui/icons-material/UnfoldLess'
 import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore'
-import VideocamIcon from '@mui/icons-material/Videocam'
-import VideocamOffIcon from '@mui/icons-material/VideocamOff'
-import { Box, Button, Chip, Divider, IconButton, List, ListItem, Stack, Typography, alpha, useTheme } from '@mui/material'
+import { Box, Chip, Divider, IconButton, List, ListItem, Stack, Typography, alpha, useTheme } from '@mui/material'
 import { useState } from 'react'
 import { DraggableCard } from '../components/DraggableCard'
-import { GestureController } from '../components/GestureController'
 import { education } from '../data/education'
 import { experiences } from '../data/experience'
 import { projects } from '../data/projects'
 import { skills } from '../data/skills'
 import { publications } from '../data/publications'
+import { useGesture } from '../context/GestureContext'
 
 type Position = {
   x: number
@@ -38,6 +36,7 @@ const CardHeader = ({ title, isExpanded, onToggle }: { title: string, isExpanded
 
 const InteractPage = () => {
   const theme = useTheme()
+  const { gestureEnabled } = useGesture()
   const [positions, setPositions] = useState<Record<string, Position>>(() => {
     const isMobile = window.innerWidth < 900
     if (isMobile) {
@@ -63,7 +62,6 @@ const InteractPage = () => {
   })
 
   const [expandedId, setExpandedId] = useState<string | null>(null)
-  const [gestureEnabled, setGestureEnabled] = useState(false)
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -122,26 +120,9 @@ const InteractPage = () => {
                     display: { xs: 'none', sm: 'block' }
                 }}
             >
-                Canvas Mode: Drag cards to rearrange • Click arrows to expand
+                Canvas Mode: Drag cards to rearrange • Click arrows to expand {gestureEnabled && '• Pinch to Drag'}
             </Typography>
-
-            <Button
-                variant={gestureEnabled ? 'contained' : 'outlined'}
-                color={gestureEnabled ? 'primary' : 'inherit'}
-                size="small"
-                startIcon={gestureEnabled ? <VideocamIcon /> : <VideocamOffIcon />}
-                onClick={() => setGestureEnabled(!gestureEnabled)}
-                sx={{ 
-                    bgcolor: gestureEnabled ? undefined : alpha(theme.palette.background.paper, 0.7),
-                    backdropFilter: 'blur(4px)',
-                    display: { xs: 'none', md: 'flex' }
-                }}
-            >
-                {gestureEnabled ? 'Gestures On' : 'Enable Camera'}
-            </Button>
       </Box>
-
-      <GestureController enabled={gestureEnabled} />
 
       <DndContext sensors={sensors} onDragEnd={handleDragEnd} modifiers={[restrictToParentElement]}>
         {/* About Card */}

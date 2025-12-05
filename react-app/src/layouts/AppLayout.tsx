@@ -1,6 +1,8 @@
 import DarkModeIcon from '@mui/icons-material/DarkMode'
 import LightModeIcon from '@mui/icons-material/LightMode'
 import MenuIcon from '@mui/icons-material/Menu'
+import VideocamIcon from '@mui/icons-material/Videocam'
+import VideocamOffIcon from '@mui/icons-material/VideocamOff'
 import {
   AppBar,
   Box,
@@ -16,10 +18,15 @@ import {
   Stack,
   Toolbar,
   Typography,
+  Tooltip,
+  alpha,
+  useTheme,
 } from '@mui/material'
 import { useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useColorMode } from '../context/ColorModeContext'
+import { useGesture } from '../context/GestureContext'
+import { GestureController } from '../components/GestureController'
 import { navItems } from '../data/navigation'
 
 const drawerWidth = 260
@@ -28,11 +35,31 @@ const AppLayout = () => {
   const [mobileOpen, setMobileOpen] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
+  const theme = useTheme()
   const { toggleColorMode, mode } = useColorMode()
+  const { gestureEnabled, setGestureEnabled } = useGesture()
 
   const handleNavigate = (path: string) => {
     navigate(path)
     setMobileOpen(false)
+  }
+
+  const handleSwipeLeft = () => {
+    // Left swipe (hand moves left) -> Go to Next Tab (conceptually pushing content left to reveal next)
+    // OR: Left swipe -> Go Back?
+    // Convention: Swipe Left (finger moves right to left) -> Go to Next Page.
+    const currentIndex = navItems.findIndex(item => item.path === location.pathname)
+    if (currentIndex === -1) return 
+    const nextIndex = (currentIndex + 1) % navItems.length
+    navigate(navItems[nextIndex].path)
+  }
+
+  const handleSwipeRight = () => {
+    // Right swipe (hand moves right) -> Go to Previous Tab
+    const currentIndex = navItems.findIndex(item => item.path === location.pathname)
+    if (currentIndex === -1) return
+    const prevIndex = (currentIndex - 1 + navItems.length) % navItems.length
+    navigate(navItems[prevIndex].path)
   }
 
   const drawer = (
@@ -51,7 +78,10 @@ const AppLayout = () => {
           <List>
             {navItems.map((item) => (
               <ListItem disablePadding key={item.path}>
-                <ListItemButton onClick={() => handleNavigate(item.path)}>
+                <ListItemButton 
+                  onClick={() => handleNavigate(item.path)}
+                  selected={location.pathname === item.path}
+                >
                   <ListItemText primary={item.label} />
                 </ListItemButton>
               </ListItem>
@@ -64,6 +94,12 @@ const AppLayout = () => {
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: 'background.default' }}>
+      <GestureController 
+        enabled={gestureEnabled} 
+        onSwipeLeft={handleSwipeLeft}
+        onSwipeRight={handleSwipeRight}
+      />
+      
       <AppBar
         position="fixed"
         color="inherit"
@@ -89,20 +125,41 @@ const AppLayout = () => {
             Yash Patil
           </Typography>
           <Stack direction="row" spacing={1} sx={{ display: { xs: 'none', md: 'flex' }, mr: 2 }}>
-            {navItems.map((item) => (
-              <Button
-                key={item.path}
-                onClick={() => handleNavigate(item.path)}
-                color="primary"
-                sx={{
-                  textTransform: 'none',
-                  fontWeight: 500 + Number(location.pathname === item.path) * 100,
-                }}
-              >
-                {item.label}
-              </Button>
-            ))}
+            {navItems.map((item) => {
+              const isActive = location.pathname === item.path
+              return (
+                <Button
+                  key={item.path}
+                  onClick={() => handleNavigate(item.path)}
+                  sx={{
+                    textTransform: 'none',
+                    fontWeight: isActive ? 700 : 500,
+                    color: isActive ? 'primary.main' : 'text.secondary',
+                    bgcolor: isActive ? alpha(theme.palette.primary.main, 0.1) : 'transparent',
+                    '&:hover': {
+                      bgcolor: isActive 
+                        ? alpha(theme.palette.primary.main, 0.2) 
+                        : alpha(theme.palette.text.secondary, 0.05)
+                    }
+                  }}
+                >
+                  {item.label}
+                </Button>
+              )
+            })}
           </Stack>
+          
+          <Tooltip title={gestureEnabled ? "Disable Gestures" : "Enable Gestures"}>
+            <IconButton 
+                onClick={() => setGestureEnabled(!gestureEnabled)} 
+                color={gestureEnabled ? "primary" : "inherit"}
+                aria-label="toggle gestures"
+                sx={{ mr: 1 }}
+            >
+                {gestureEnabled ? <VideocamIcon /> : <VideocamOffIcon />}
+            </IconButton>
+          </Tooltip>
+
           <IconButton onClick={toggleColorMode} color="inherit" aria-label="toggle dark mode">
             {mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
           </IconButton>

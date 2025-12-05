@@ -6,12 +6,16 @@ import {
 import { Box, CircularProgress, Typography, useTheme, alpha } from '@mui/material'
 import { useEffect, useRef, useState } from 'react'
 import Webcam from 'react-webcam'
+import { useGesture } from '../context/GestureContext'
 
 type GestureControllerProps = {
   enabled: boolean
+  onSwipeLeft?: () => void
+  onSwipeRight?: () => void
 }
 
-export const GestureController = ({ enabled }: GestureControllerProps) => {
+export const GestureController = ({ enabled, onSwipeLeft, onSwipeRight }: GestureControllerProps) => {
+  const { triggerSwipe } = useGesture()
   const webcamRef = useRef<Webcam>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isLoaded, setIsLoaded] = useState(false)
@@ -24,6 +28,19 @@ export const GestureController = ({ enabled }: GestureControllerProps) => {
   const [isHovering, setIsHovering] = useState(false)
   const smoothPosRef = useRef<{x: number, y: number} | null>(null)
 
+  // Callbacks refs to avoid stale closures in animation loop
+  const onSwipeLeftRef = useRef(onSwipeLeft)
+  const onSwipeRightRef = useRef(onSwipeRight)
+
+  useEffect(() => {
+    onSwipeLeftRef.current = onSwipeLeft
+    onSwipeRightRef.current = onSwipeRight
+  }, [onSwipeLeft, onSwipeRight])
+
+  // Swipe detection refs
+  const positionHistoryRef = useRef<{x: number, time: number}[]>([])
+  const SWIPE_THRESHOLD = 300 // pixels
+  const SWIPE_TIMEOUT = 300 // ms
 
   // Initialize MediaPipe HandLandmarker
   useEffect(() => {
@@ -55,6 +72,7 @@ export const GestureController = ({ enabled }: GestureControllerProps) => {
       setCursorPos(null)
       setIsHovering(false)
       smoothPosRef.current = null
+      positionHistoryRef.current = []
       if (requestRef.current) {
         cancelAnimationFrame(requestRef.current)
       }
@@ -66,6 +84,43 @@ export const GestureController = ({ enabled }: GestureControllerProps) => {
       }
     }
   }, [enabled])
+
+  const detectSwipe = (currentX: number) => {
+    const now = Date.now()
+
+    // Add current position to history
+    positionHistoryRef.current.push({ x: currentX, time: now })
+
+    // Remove old positions
+    positionHistoryRef.current = positionHistoryRef.current.filter(
+      p => now - p.time < SWIPE_TIMEOUT
+    )
+
+    if (positionHistoryRef.current.length < 5) return
+
+    const oldest = positionHistoryRef.current[0]
+    const newest = positionHistoryRef.current[positionHistoryRef.current.length - 1]
+    const diffX = newest.x - oldest.x
+
+    if (Math.abs(diffX) > SWIPE_THRESHOLD) {
+      // Check global cooldown
+      if (!triggerSwipe()) return
+
+      if (diffX > 0) {
+        // Moved Right
+        if (onSwipeRightRef.current) {
+          onSwipeRightRef.current()
+          positionHistoryRef.current = []
+        }
+      } else {
+        // Moved Left
+        if (onSwipeLeftRef.current) {
+          onSwipeLeftRef.current()
+          positionHistoryRef.current = []
+        }
+      }
+    }
+  }
 
   const processVideo = () => {
     if (
@@ -128,6 +183,9 @@ export const GestureController = ({ enabled }: GestureControllerProps) => {
       
       // Update visual cursor state
       setCursorPos({ x: cursorX, y: cursorY })
+
+      // Detect Swipe
+      detectSwipe(cursorX)
 
       // Draw virtual cursor on canvas for feedback
       // We need to map this back to canvas coordinates for drawing
@@ -316,7 +374,7 @@ export const GestureController = ({ enabled }: GestureControllerProps) => {
                         borderRadius: 0.5 
                     }}
                 >
-                    {cameraPermission === false ? 'Camera Denied' : isLoaded ? 'Pinch to Grab' : 'Initializing...'}
+                    {cameraPermission === false ? 'Camera Denied' : isLoaded ? 'Wave to Navigate • Pinch to Click' : 'Initializing...'}
                 </Typography>
             </Box>
         </Box>
