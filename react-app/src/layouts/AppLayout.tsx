@@ -22,7 +22,7 @@ import {
   alpha,
   useTheme,
 } from '@mui/material'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useColorMode } from '../context/ColorModeContext'
 import { useGesture } from '../context/GestureContext'
@@ -31,6 +31,42 @@ import { navItems } from '../data/navigation'
 
 const drawerWidth = 260
 
+const useTypewriter = (text: string, speed = 100, pauseBetween = 2000) => {
+  const [displayText, setDisplayText] = useState('')
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [loopNum, setLoopNum] = useState(0)
+
+  useEffect(() => {
+    let timer: number
+
+    const handleType = () => {
+      const currentText = text
+      
+      if (isDeleting) {
+        setDisplayText(prev => prev.substring(0, prev.length - 1))
+      } else {
+        setDisplayText(prev => currentText.substring(0, prev.length + 1))
+      }
+
+      if (!isDeleting && displayText === currentText) {
+        timer = setTimeout(() => setIsDeleting(true), pauseBetween)
+      } else if (isDeleting && displayText === '') {
+        setIsDeleting(false)
+        setLoopNum(loopNum + 1)
+        timer = setTimeout(handleType, 500)
+      } else {
+        const typeSpeed = isDeleting ? speed / 2 : speed
+        timer = setTimeout(handleType, typeSpeed)
+      }
+    }
+
+    timer = setTimeout(handleType, speed)
+    return () => clearTimeout(timer)
+  }, [displayText, isDeleting, loopNum, text, speed, pauseBetween])
+
+  return displayText
+}
+
 const AppLayout = () => {
   const [mobileOpen, setMobileOpen] = useState(false)
   const navigate = useNavigate()
@@ -38,6 +74,8 @@ const AppLayout = () => {
   const theme = useTheme()
   const { toggleColorMode, mode } = useColorMode()
   const { gestureEnabled, setGestureEnabled } = useGesture()
+  
+  const typedName = useTypewriter('Yash Patil')
 
   const handleNavigate = (path: string) => {
     navigate(path)
@@ -84,8 +122,33 @@ const AppLayout = () => {
     <Box sx={{ textAlign: 'center', height: '100%' }}>
       <Stack spacing={0} sx={{ height: '100%' }}>
         <Box sx={{ py: 3 }}>
-          <Typography variant="h6" component="div">
-            Yash Patil
+          <Typography 
+            variant="h6" 
+            component="div"
+            sx={{ 
+              fontFamily: 'monospace', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center' 
+            }}
+          >
+            <span style={{ color: theme.palette.secondary.main, marginRight: '4px' }}>&gt;</span>
+            {typedName}
+            <Box
+              component="span"
+              sx={{
+                display: 'inline-block',
+                width: '10px',
+                height: '1.2em',
+                backgroundColor: theme.palette.text.primary,
+                ml: 0.5,
+                animation: 'blink 1s step-end infinite',
+                '@keyframes blink': {
+                  '0%, 100%': { opacity: 1 },
+                  '50%': { opacity: 0 },
+                },
+              }}
+            />
           </Typography>
           <Typography variant="body2" color="text.secondary">
             Technology Enthusiast
@@ -137,10 +200,32 @@ const AppLayout = () => {
           <Typography
             variant="h6"
             component="div"
-            sx={{ flexGrow: 1, cursor: 'pointer' }}
+            sx={{ 
+              flexGrow: 1, 
+              cursor: 'pointer',
+              fontFamily: 'monospace', // Code-like font
+              display: 'flex',
+              alignItems: 'center'
+            }}
             onClick={() => handleNavigate('/')}
           >
-            Yash Patil
+            <span style={{ color: theme.palette.secondary.main, marginRight: '4px' }}>&gt;</span>
+            {typedName}
+            <Box
+              component="span"
+              sx={{
+                display: 'inline-block',
+                width: '10px',
+                height: '1.2em',
+                backgroundColor: theme.palette.text.primary,
+                ml: 0.5,
+                animation: 'blink 1s step-end infinite',
+                '@keyframes blink': {
+                  '0%, 100%': { opacity: 1 },
+                  '50%': { opacity: 0 },
+                },
+              }}
+            />
           </Typography>
           <Stack direction="row" spacing={1} sx={{ display: { xs: 'none', md: 'flex' }, mr: 2 }}>
             {navItems.map((item) => {
