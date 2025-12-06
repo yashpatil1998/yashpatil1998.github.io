@@ -35,7 +35,7 @@ const HomePage = () => (
                     variant="contained"
                     size="large"
                     color="secondary"
-                    href="/YashPatil_Resume.pdf"
+                    href="/YashPatil_CV.pdf"
                     target="_blank"
                     rel="noopener noreferrer"
                 >
