@@ -71,9 +71,6 @@ const SkillsPage = () => (
                         </Typography>
                         <Stack spacing={1}>
                             <LinearProgress value={skill.proficiency} variant="determinate" sx={{height: 8, borderRadius: 4}} />
-                            <Typography variant="caption" color="text.secondary">
-                                Proficiency: {skill.proficiency}%
-                            </Typography>
                         </Stack>
                     </Stack>
                 </Paper>
