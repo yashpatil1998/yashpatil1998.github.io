@@ -14,5 +14,6 @@ export const navItems: NavItem[] = [
     {label: 'Canvas', path: '/canvas'},
     {label: 'Interact', path: '/interact'},
     {label: 'Contact', path: '/contact'},
+    {label: 'Privacy Policy', path: '/privacy-policy'},
 ]
 

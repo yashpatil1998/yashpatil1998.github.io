@@ -10,6 +10,7 @@ import InteractPage from './pages/InteractPage'
 import ProjectsPage from './pages/ProjectsPage'
 import PublicationsPage from './pages/PublicationsPage'
 import SkillsPage from './pages/SkillsPage'
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage'
 
 const App = () => (
   <Routes>
@@ -24,6 +25,7 @@ const App = () => (
       <Route path="/publications" element={<PublicationsPage />} />
       <Route path="/education" element={<EducationPage />} />
       <Route path="/contact" element={<ContactPage />} />
+      <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Route>
   </Routes>
