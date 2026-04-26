@@ -27,6 +27,24 @@ const HomePage = () => (
             <Typography variant="h6" color="rgba(255,255,255,0.85)" fontWeight={400}>
                 Software engineer with experience across microservices, computer vision, deep learning, and big data projects.
             </Typography>
+            <Box
+                sx={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    px: 1.5,
+                    py: 0.5,
+                    borderRadius: 2,
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    backdropFilter: 'blur(4px)',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                }}
+            >
+                <img
+                    src="https://hits.sh/yashpatil1998.github.io.svg"
+                    alt="Website Views"
+                    style={{ height: 20, verticalAlign: 'middle' }}
+                />
+            </Box>
             <Typography variant="body1" color="rgba(255,255,255,0.85)">
                 I build dependable systems, craft data-driven solutions, and love partnering with teams to tackle challenging engineering problems.
             </Typography>
@@ -50,4 +68,3 @@ const HomePage = () => (
 )
 
 export default HomePage
-
