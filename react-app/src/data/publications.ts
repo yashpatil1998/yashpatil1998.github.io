@@ -9,14 +9,6 @@ export type Publication = {
 
 export const publications: Publication[] = [
   {
-    title: "American and Indian Sign Language Translation using Computer Vision",
-    summary: "Translation system bridging American and Indian Sign Languages using computer vision techniques.", 
-    venue: "SSRN Elsevier",
-    year: "2020",
-    url: "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3709073",
-    logo: "https://img.logo.dev/ssrn.com?token=pk_UNjh2tfPRpGeBWAnvuKbAg"
-  },
-  {
     title: "AI-Enabled Real-Time Sign Language Translator",
     summary: "Real-time android application for translating sign language to text using CNNs.",
     venue: "Springer - Soft Computing: Theories and Applications",
@@ -25,20 +17,12 @@ export const publications: Publication[] = [
     logo: "https://img.logo.dev/springer.com?token=pk_UNjh2tfPRpGeBWAnvuKbAg"
   },
   {
-    title: "Intelligent Blood Management System", 
+    title: "Intelligent Blood Management System",
     summary: "IoT-based system for efficient management and tracking of blood banks and donations.",
-    venue: "IEEE - Bombay Section Signature Conference", 
+    venue: "IEEE - Bombay Section Signature Conference",
     year: "2020",
     url: "https://ieeexplore.ieee.org/document/8973008",
     logo: "https://img.logo.dev/ieee.org?token=pk_UNjh2tfPRpGeBWAnvuKbAg"
-  },
-  {
-    title: "Vehicle Number Plate Detection using Convolutional Neural Networks",
-    summary: "Automated license plate recognition system utilizing Convolutional Neural Networks.",
-    venue: "Asian Journal of Convergence in Technology",
-    year: "2019",
-    url: "https://www.asianssr.org/index.php/ajct/article/view/868",
-    logo: "https://img.logo.dev/asianssr.org?token=pk_UNjh2tfPRpGeBWAnvuKbAg"
   },
   {
     title: "Cellular Device Detection in Restricted Premises",
@@ -47,6 +31,22 @@ export const publications: Publication[] = [
     year: "2019",
     url: "https://ieeexplore.ieee.org/document/8978318",
     logo: "https://img.logo.dev/ieee.org?token=pk_UNjh2tfPRpGeBWAnvuKbAg"
+  },
+  {
+    title: "American and Indian Sign Language Translation using Computer Vision",
+    summary: "Translation system bridging American and Indian Sign Languages using computer vision techniques.",
+    venue: "SSRN Elsevier",
+    year: "2020",
+    url: "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3709073",
+    logo: "https://img.logo.dev/ssrn.com?token=pk_UNjh2tfPRpGeBWAnvuKbAg"
+  },
+  {
+    title: "Vehicle Number Plate Detection using Convolutional Neural Networks",
+    summary: "Automated license plate recognition system utilizing Convolutional Neural Networks.",
+    venue: "Asian Journal of Convergence in Technology",
+    year: "2019",
+    url: "https://www.asianssr.org/index.php/ajct/article/view/868",
+    logo: "https://img.logo.dev/asianssr.org?token=pk_UNjh2tfPRpGeBWAnvuKbAg"
   },
   {
     title: "Basic Logic Gate Detector using ATmega328P and Android App",
