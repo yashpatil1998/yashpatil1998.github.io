@@ -4,9 +4,9 @@ import {Box, Button, List, ListItem, ListItemIcon, ListItemText, Paper, Stack, T
 import {useEffect} from 'react'
 
 const focusAreas = [
-    'Microservices, UI, CI/CD, Test Automation, and Infrastructure',
-    'Computer vision and deep learning implementations with real-world impact',
-    'Data engineering across big data ecosystems',
+    'Distributed backend systems, microservices, and cloud-native infrastructure on GCP',
+    'Financial systems engineering across payments, wealth management, and SaaS platforms',
+    'Client-facing product development bridging engineering and business needs',
 ]
 
 const AboutPage = () => {
@@ -31,22 +31,22 @@ const AboutPage = () => {
                     About
                 </Typography>
                 <Typography variant="subtitle1" color="text.secondary">
-                    Technology analyst, lifelong learner, and builder of thoughtful engineering solutions.
+                    Senior Technology Associate, fintech engineer, and builder of distributed financial systems.
                 </Typography>
             </Stack>
             <Paper elevation={0} sx={{p: {xs: 3, md: 4}, borderRadius: 3, border: (theme) => `1px solid ${theme.palette.divider}`}}>
                 <Stack spacing={2}>
                     <Typography variant="body1">
-                        Implementing technology solutions for a FinTech, I'm seasoned in Microservices, UI, CI/CD, Test Automation, and Infrastructure.
+                        With 5+ years in fintech engineering, I specialise in building distributed backend systems, cloud-native infrastructure, and client-facing financial products across payments and wealth management.
                     </Typography>
                     <Typography variant="body1">
-                        At MSCI, I am a part of the Wealth Management Team, where I am building features as part of the MSCI Wealth Manager application, majorly focusing on the reallocation of assets, helping clients understand their portfolio returns and optimize taxes and costs.
+                        At MSCI, I'm part of the Wealth Management team building MSCI Wealth Manager, a platform that helps clients personalise and optimise their wealth portfolios. My work spans automated asset allocation and rebalancing pipelines, portfolio tax optimisation, and cloud-native backend services on GCP. I also serve as a Forward Deployed Engineer for clients across APAC and AMER, working directly with clients to surface product gaps and translate business needs into engineering decisions.
                     </Typography>
                     <Typography variant="body1">
-                        In Deutsche Bank, I was a part of Contextual Banking (popularly Banking as a Service or Embedded Financing), where I built Synthix, a marketplace for financial institutions and corporates to publish/subscribe to banking products as a service. Previously, I have worked in Corporate Payments Technology, where I contributed to building APIs for payments targeting multiple regions like India and SEPA.
+                        At Deutsche Bank, I built Synthix, a global receivables SaaS platform for corporate payments, and contributed to Corporate Payments Technology, delivering payment APIs across India, SEPA, UK, and other regions. My work included distributed systems with Go and Spring Boot, OAuth2.0, mTLS security, and event-driven architecture on GCP.
                     </Typography>
                     <Typography variant="body1">
-                        During my internship tenure and academic research publications, I've worked on NLP, Deep Learning, Computer Vision, and Big Data-based implementations.
+                        During my academic years, I published research across IEEE and Springer on computer vision, NLP, and deep learning. These experiences continue to inform how I think about data-driven systems.
                     </Typography>
                     <Typography variant="body1">
                         Feel free to get in touch and extend our professional network.
@@ -134,4 +134,3 @@ const AboutPage = () => {
 }
 
 export default AboutPage
-
