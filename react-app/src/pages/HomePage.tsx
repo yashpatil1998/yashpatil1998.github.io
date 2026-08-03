@@ -1,4 +1,5 @@
 import { Box, Button, Chip, Stack, Typography } from '@mui/material'
+import cvPdf from "../assets/YashPatil_CV.pdf";
 
 const HomePage = () => (
     <Box
@@ -53,7 +54,7 @@ const HomePage = () => (
                     variant="contained"
                     size="large"
                     color="secondary"
-                    href="/YashPatil_CV.pdf"
+                    href={cvPdf}
                     target="_blank"
                     rel="noopener noreferrer"
                 >
